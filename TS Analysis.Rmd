@@ -1,0 +1,148 @@
+---
+title: "Time Series Analysis of Historic US Unemployment Rate"
+author: "Marcos Jaen"
+date: "9/22/2022"
+output: html_document
+---
+Unemployment is an economic phenomena of such importance that a lot of literature has being devoted to it. The term unemployment refers to the situation when job-seeker, for more than 3 months, actively searches to provide its labour to the market, however is unable to find work. Unemployment rate is an economic indicator that measures the number of unemployed people as a percentage of the labour force population (those age between 16-65). It is normal and healthy to have some minor level of unemployment in an economy, this level is usually denoted as the natural unemployment rate. Studies have shown that this rate is unique to every economy and is dependent of various factors, but most economies have a natural unemployment rate of 4 to 5 percent.
+
+Thus, due to the importance that this indicator has in our lives and my interest in economics I have decided to forecast the US unemployment rate using historic data and compare my results to the actual figures. The data I will use comes from the R library astsa and is named UnempRate. It has the monthly U.S. unemployment rate in percent unemployed from Jan, 1948 to Nov, 2016. The purpose of this study is to evaluate to what extent it is possible to predict the unemployment rate of a nation using its historical unemployment figures and advance statistical methods.
+
+```{r}
+# Load library and data
+library(astsa)
+data(UnempRate)
+# Plot the data
+plot.ts(UnempRate, main="US Unemployment Rate (Jan, 1948 - Nov, 2016)",
+xlab="Year", ylab="Unemployment Rate")
+```
+
+Clearly, the mean is not constant and the process is not currently stationary. Now we will plot the acf and pacf. 
+
+```{r}
+plt = acf2(UnempRate,200)
+```
+
+We compute the sample ACF and PACF to see how quickly p(h) decays. As shown above, the sample ACF decays to zero extremly slowly as h increases, meaning that differencing is needed. We will try to make the data stationary by differencing:
+
+```{r}
+diff1 = diff(UnempRate)
+plt = acf2(diff1,200)
+# Plot first difference data
+plot.ts(diff1, main="Monthly Change in US Unemployment Rate (Jan, 1948 - Nov, 2016)",
+xlab="Year", ylab="Monthly Change in Unemployment Rate")
+
+```
+
+The ACF and PACF of first difference suggests a seasonal trend as every 12 months we see peaks every lag 12 on the ACF. We will do a month plot of our first differenced data to see if this hypothesis is veridict. 
+
+Our plot of the first difference data shows a mean that is now roughly constant around zero. The variance also is no longer drifting. Thus, further differencing is probably not needed, making our hypothesis of a seasonal trend stronger.
+
+From economics, we know about seasonal unemployment and cyclical unemployment. Hence, our observations are also supported by literature. 
+
+```{r}
+#month plot of unaltered data 
+monthplot(UnempRate)
+#month plot of first difference data
+monthplot(diff1)
+```
+
+From the monthplots we see that our hypothesis is correct. We will proceed by continue working with seasonal data. 
+
+```{r}
+diff12 = diff(UnempRate, 12)
+# Plot lag 12 difference data
+plot.ts(diff12, main="Yearly Change of Monthly Change in US Unemployment Rate",
+xlab="Year", ylab="Yealy Change of Monthly Change in Unemployment Rate")
+plt = acf2(diff12,50)
+
+```
+
+Our plot of seasonally differenced data looks like a random walk with roughly constant mean around zero and not much drifting in variance. Thus, we may assume our data is now stationary.
+
+The seasonal ACF plot goes to zero after lag 1 and the PACF tails off, indicating P = 0 and Q = 1. The nonseasonal PACF cuts off after lag 3, thus we propose an $ARIMA(3,1,0)xARIMA(0,1,1)_{12}$ model. Another alternative model we propose for the sake of variety and comparison is $ARIMA(3,1,3)xARIMA(0,1,1)_{12}$, the difference between the former and the latter model is that the latter has a non-seasonal MA(3) while the former has a non-season MA(0). 
+
+```{r}
+model1 = sarima(UnempRate,3,1,0, 0,1,1, 12)
+print(model1$ttable)
+```
+
+Inspection of the standard residuals show no obvious patterns, however there are at least 2 outliers exceeding 3 standard deviations from the mean. The ACF Residuals plot doesn't show any significant spikes. Hence, we conclude that there are largely no apparent departures from the model randomness assumption. The Normal Q-Q Plot of Residuals also support that there are no apparent departures from the normality assumption aside from some outliers in the tails, which show some departure from normality.  However, most of the p-values for Ljung-Box statistics are at or above the significant level, so we accept the null hypothesis that the residuals are independent.
+
+From the values in the table of Component & Coefficient Estimate & Standard Error & P-Value we can derive that all coefficients are non-zero as all our AR terms are have a p-value less than the significance level of 0.05 and our MA terms has a  p-value less than the significance level. I should also highlight that this model had an AIC of -18.08 and a variance of residuals of 0.05582. 
+
+So our model is thus, 
+
+$(1-B)(x_t-.1148_{(.0351)}x_{t-1} -.2023_{(.0345)}x_{t-2} - .0900_{(.0350)}x_{t-3})$ = $(1-B)(1-B^{12})(w_t-.7674_{(.0256)}w_{t-1})$.
+
+
+In non-technical language, our model tells us that we can forecast a future unemployment rate value by knowing the past four unemployment rates and multiplying them by some constant depending on the date of the observation. Moreover, it also has some differencing meaning that we will have to take the difference of the values we obtain, and white noise terms, one of which is also multiplied by a constant.
+
+```{r}
+model2 = sarima(UnempRate,3,1,3, 0,1,1, 12)
+print(model2$ttable)
+```
+
+Model 2 satisfies the standard residuals test and it only has 1  outliers exceeding 3 standard deviations from the mean. It also satisifies the ACF Residuals plot test and the Normall Q-Q Plot test, hence, we satisfy the randomness and normality assumption. Model 2 also performs better than Model 1 for the Ljung-Box statistic test.
+
+From the values in the table of Component & Coefficient Estimate & Standard Error & P-Value we fail to reject the hypothesis that the AR(2) coefficient is non-zero as their p-values is greater than the significance level of 0.05. The AIC of this model is -20.97 and a variance of residuals of 0.05507. 
+
+Using AIC criteria, Model 2 is better fit and some assumptions are better satisfied, however, some components of the model have coefficients with p-values that fail our hypothesis test. Thus, we decide in favour of Model 1. Likewise, we will not discuss or analyze Model 2 anymore.
+
+```{r}
+# Forecasting for the next 10 months
+Unemployment_Rate =  UnempRate
+pred1 = sarima.for(Unemployment_Rate,10, 3,1,3, 0, 1,1, 12, main="Forecasting of US Unemployment Rate for Next 10 months")
+# Set month vector
+year = c(1:10)
+# Get the 5% upper Prediction interval
+upper = pred1$pred+qnorm(0.975)*pred1$se
+# Get the 5% lower Prediction interval
+lower = pred1$pred-qnorm(0.975)*pred1$se
+# Construct a dataframe for the intervals
+(data.frame("Prediction"=pred1$pred,"PI 95% Lower Bound"=lower,"PI 95% Upper Bound"=upper))
+UnempRate
+```
+
+We can see that after the second month, the prediction of next months are within the confidence interval of previous months and more importantly, the standard deviation of the confidence interval increases really fast decreasing the precision of our predictions. Now I will compare the predicted values of my model versus the actual values. 
+
+![Predicted vs Actual](/Users/lourdescortes/Desktop/as 2.png)
+
+My predicted values are extremely accurate to the extent that only 1 out of 10 is has a difference of more than 0.1 with the real or actual value, which is my second last predicted value. This shows my model was a success as it was able to accomplish the goal it was built for. 
+
+Unemployment closely follows the business cycle, hence, it is of importance to execute an spectral analysis and find the three dominant frequencies on our data. 
+```{r}
+# Spectral analysis for UnempRate series
+UnempRate.per = mvspec(UnempRate, log = "no")
+P2<-UnempRate.per$details[order(UnempRate.per$details[,3],decreasing = TRUE),]
+#Identify the first three dominant frequencies for UnempRate series
+P2[1,];P2[2,];P2[3,]
+##95% CIs for the dominant frequencies for UnempRate series in part(a)
+UnempRate.u1 = 2*P2[1,3]/qchisq(.025,2)
+UnempRate.l1 = 2*P2[1,3]/qchisq(.975,2)
+UnempRate.u2 = 2*P2[2,3]/qchisq(.025,2)
+UnempRate.l2 = 2*P2[2,3]/qchisq(.975,2)
+UnempRate.u3 = 2*P2[3,3]/qchisq(.025,2)
+UnempRate.l3 = 2*P2[3,3]/qchisq(.975,2)
+##Create a data frame for the CIs
+Result <- data.frame(Series=c(rep("UnempRate",3)),
+Dominant.Freq=c(P2[1,1],P2[2,1],P2[3,1]), Spec=c(P2[1,3],P2[2,3],P2[3,3]),
+Lower=c(UnempRate.l1,UnempRate.l2,UnempRate.l3),
+Upper=c(UnempRate.u1,UnempRate.u2,UnempRate.u3))
+Result[1:2,3:5] = round(Result[1:2,3:5], 4)
+Result
+
+```
+
+From our spectral analysis data we can see that
+we cannot establish the significance of the first peak since the periodogram ordinate is 14.4829, which lies in
+the confidence intervals of the second and third peak. Similarly,  we cannot establish the significance of the second peak since the periodogram ordinate is 11.1720, which lies
+in the confidence interval of the first and third peak and we cannot establish the significance of the third peak since the periodogram ordinate is 9.9625, which lies in
+the confidence interval of the second peak and fist peak.
+
+Conclusion:
+ARIMA models are an efficient way of forecasting short-term economic indicators such as unemployment rate, however, we must first acknowledge the weaknesses that this approach has, such as the assumption of Ceteris paribus, meaning that we assume that all the other things that may affect unemployment are held constant to some degree, which is unreasonable as things such as a war or a pandemic may heavily influence unemployment.
+
+Regarding the model, the weaknesses it has are that it is really hard to explain it in a non-technical way, the model itself has significant outliers in its error terms, it lacks precision for long-term forecasting, it assumes Ceteris paribus as explained earlier,and it only works for the US economy, it is not universal. However, as shown by the results we obtained from the model, we can say that even with this limitations, the model was a success as it very accurately and precisely predicted future values. 
+
+I believe that more research should be done in the area of exogenous shocks and how they can be predicted or modeled using economic indicators, as that is one of the biggest weaknesses of the majority of economic models, and any breakthrough in this field of knowledge will greatly positively impact the field of economics and econometrics.
