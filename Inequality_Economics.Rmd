@@ -1,0 +1,211 @@
+---
+title: "Does Inequality Affects rGDP in Central America?"
+author: "Marcos Jaen"
+date: "9/22/2022"
+output: html_document
+---
+
+Income inequality, measured by the GINI coefficient, is the unevenness of the distribution of income throughout a population as a result of several factors (i.e., education, globalization, labor markets, wealth concentration, etc.). Due to its growing relevance in today’s society, various studies have been conducted to find the relationship between income inequality and other economic variables, such as economic growth defined as the increase in the output per capita per annum. This research has offered contrasting results. More importantly, few studies study Central America in isolation, and if they do, they tend to focus more on the political instability and other non-quantifiable factors than statistics and data. This, along with the interest of finding a final answer to the relationship between income inequality and economic growth, has motivated the research question of this study: What is the impact of income inequality on the economic growth of Central America?
+
+```{r}
+pwt100 <-read.csv("/Users/lourdescortes/Desktop/Marcos Libros/Job Search/data.csv")
+```
+
+The CSV file above was obtained directly by modifying the excel file on the repository corresponding to Load Penn World Tables dataset. 
+
+I added some desired columns via trivial VBA operations in excel and some external data sources. The externally added data points where those of GINI coefficient data and GNI data from the World Bank Data. 
+
+If the same data points want to be obtained but directly from R look at the code below. Remember to then add the data corresponding to GINI coefficient data and GNI data from the World Bank Data. 
+
+```
+#alternative mode of data cleaning using r
+#library("xlsx")
+pwt100 <- read.xlsx("/Users/lourdescortes/Desktop/Marcos Libros/Job Search/pwt100_sub.xlsx",3)
+```
+Now, we should first clean our data set. Normally we would decide upon the variables we will use later after trying a few models, however as I will use a variation of a model proposed by Forbes, K.J.on his paper "A Reassessment of the Relationship between Inequality and Economic Growth (2000)" I will use the variables in the following model: $avg.growth_{t,i}$ = $B_0$ + $B_1GINI_{t-1,i}$ + $B_2Income_{t-1,i}$ + $B_3HumanCapital_{t-1,i}$ + $B_4Workers_{t-1,i}$ + $\epsilon$ for country i in time t {i,t = 1, 2, 3, ...}.Thus I will delete the unnecesary columns. The differences between the model proposed in that paper and here is that we will use average annual growth instead of year on year economic growth to minimize the effect of short-run recessions when studying the behavior of economic growth over a long period of time. Moreover, I will use log(GINI) as a proxy to income instead of any other measurement, and total laborforce instead number of employed as a measurement of workers.  
+
+```{r}
+library(dplyr)
+build_data <- pwt100
+#Perform EDA
+#delete data points with 0 data
+build_data[build_data==0] <- NA
+build_data_use <- build_data[ c(4,6,57:61) ]
+build_data_use<-build_data_use[complete.cases(build_data_use),]
+```
+
+The code below does virtually the same with the original Penn World Tables dataset. The only difference, as mentioned earlier, is that the csv file we work with here has extra columns were we perform operations with original dataset data to calculate the average annual growth for country i in time t {i,t = 1, 2, 3, ...}. Also we make sure all of the other variables of interest for country i correspond to time t-1 (i.e., potential predictors in the row of year t correspond to year t-1) as we attempt to uncover what effect the previous state of economic variables has in the future state of economic growth (this is not done in the code below, just the cleaning).
+
+```
+library(dplyr)
+#getind data from wanted countries
+my_range = 1:length(pwt100$country)
+data_pwt100 <- tibble()
+for (i in my_range){
+  if (pwt100$country[i] %in% c("Panama","Costa Rica","El Salvador","Nicaragua","Honduras", "Guatemala")){
+    data_pwt100 <- rbind(data_pwt100,pwt100[(i),])
+  }
+}
+#deliting unwanted cols
+data_pwt100 <- data_pwt100[ -c(1,3,5:9,12:18,20:46,48:52)]
+#deleting unwanted rows (just want years after 1990)
+my_range = 1:length(data_pwt100$year)
+data_pwt <- tibble()
+for (j in my_range){
+  if (data_pwt100$year[j] %in% c(1990:2020)){
+    data_pwt <- rbind(data_pwt,data_pwt100[(j),]) 
+  }
+}
+```
+
+Now we will perform EDA by plotting scatterplots and histograms of each numeric variable in the model-dataset. This will let us observe and acknowledge the existence of influential points, see if we will have potential problems with multicollinearity and with the normality of data assumption. We will also subdivide the dataset into test-dataset (1990-1994) and model-dataset (1995-2019).
+
+```{r}
+str(build_data)
+par(mfrow=c(2,3))
+hist(build_data_use$avg_t, main="Average rGDP Growth", xlab="rGDP (mil. 2017 USD)")
+hist(build_data_use$GINI_T_1, main="GINI Index", xlab="Gini Index (0-1)")
+hist(build_data_use$income_t_1, main="Log of GNI", xlab="Gross National Income (mil. 2017 USD)")
+hist(build_data_use$hc_t_1, main="Human Capital Index", xlab="Human Capital Index (0-1)")
+hist(build_data_use$workers_t_1, main="Total Work Force", xlab="Workers (mil.)")
+
+par(mfrow=c(2,2))
+plot(build_data_use$GINI_T_1, build_data_use$avg_t, main="Average rGDP Growth vs. GINI Index", xlab="GINI Index", ylab="Average rGDP Growth")
+plot(build_data_use$income_t_1, build_data_use$avg_t, main="Average rGDP Growth vs. Income", xlab="Income", ylab="Average rGDP Growth")
+plot(build_data_use$hc_t_1, build_data_use$avg_t, main="Average rGDP Growth vs. Human Capital", xlab="Human Capital Index", ylab="Average rGDP Growth")
+plot(build_data_use$workers_t_1, build_data_use$avg_t, main="Average rGDP Growth vs. Total Work Force", xlab="Total Work Force", ylab="Average rGDP Growth")
+
+model_data <- build_data_use[ c(5:29, 34:58, 63:112 ,117:141, 146:170), ]
+test_data <- build_data_use[ c(0:5, 30:33, 59:62, 113:116, 142:145), ]
+summary(model_data)
+```
+
+We see skews in the histograms and possible curves in the scatterplots, indicating we may have issues with non-linearity and non-normality. To verify this, let's build a model and look at residual plots.
+
+In accordance to economic theory we do see a linear trend between income, human capital, work force and economic growth. However, we will ignore this as there is virtually no other way to model rGDP, according to academia, without this variables.
+
+We will now proceed to build our model. 
+
+```{r}
+mod <- lm(avg_t ~ GINI_T_1 + income_t_1 + hc_t_1 + workers_t_1, data=model_data)
+summary(mod)$coefficients
+confint(mod)
+r <- resid(mod)
+
+# first check condition 1 and 2
+pairs(model_data[4:7],)
+plot(model_data$avg_t ~ fitted(mod), main="Avg Annual Economic Growth versus Fitted Values", xlab="Fitted Value", ylab="Avg Annual Economic Growth")
+abline(a = 0, b = 1)
+lines(lowess(model_data$avg_t ~ fitted(mod)), lty=2)
+
+
+# make all residual plots
+par(mfrow=c(2,3))
+
+plot(r ~ fitted(mod), xlab="Fitted", ylab="Residuals")
+plot(r ~ model_data$GINI_T_1, xlab="GINI Index", ylab="Residuals")
+plot(r ~ model_data$hc_t_1, xlab="Human Capital Index", ylab="Residuals")
+plot(r ~ model_data$income_t_1, xlab="Income", ylab="Residuals")
+plot(r ~ model_data$workers_t_1, xlab="Labor Force", ylab="Residuals")
+
+qqnorm(r)
+qqline(r)
+
+```
+Model summary tells us all coefficients have small p-values for the t-test, hence, we carry on with the same predictors as all variables are influential. 
+
+Residual plots show uncorrelated errors assumption doesn’t hold for any variable, non-constant variance doesn’t hold for Gini Index and Labor force and linearity holds for every variable. Observing the QQ plot also tells us we will have a potential issue with our normality assumption too (as our histograms predicted). Therefore, we continue to plot response against fitted values plot and a pairwise plot of all predictors to check condition 1 and 2. Condition 1 holds and condition 2 holds, henceforth we advance to apply Box- Cox to our model to satisfy our broken assumptions.
+
+```{r}
+#install.packages("car")
+library(car)
+
+boxCox(mod, family="bcnPower")
+
+# finally, Box-Cox predictors and response together
+p <- powerTransform(cbind(model_data[,3], model_data[,4], model_data[,5], model_data[,6], model_data[,7])~ 1)
+summary(p)
+
+```
+
+The hypothesis testing tells us to apply transformations to both predictors and response, making our this our equation with rounded powers: $\sqrt{avg.growth_{t,i}}$ = $B_0$ + $B_1GINI_{t-1,i}$ + $B_2Income_{t-1,i}$ + $B_3HumanCapital_{t-1,i}$ + $B_4\sqrt[3]{Workers_{t-1,i}}$ + $\epsilon$ 
+
+We will proceed to check what this transformations do to our model in comparison to our un-transformed model:
+
+```{r}
+
+mod2 <- lm(I((avg_t)^0.5) ~ I((GINI_T_1)) + I((income_t_1)) + I((hc_t_1)) + I((workers_t_1)^0.33), data=model_data)
+summary(mod2)
+summary(mod)
+```
+
+It is clear the model is significantly better and all the predictors are still influential. Hence, we continue by checking model assumptions of our transformed model: 
+
+```{r}
+data <- model_data %>%
+  mutate(avg_t = (avg_t)^0.5, income_t_1 = (income_t_1), hc_t_1 = (hc_t_1), workers_t_1 = (workers_t_1)^0.33, GINI_T_1 = (GINI_T_1))
+
+mod <- lm(avg_t ~ GINI_T_1 +income_t_1 + hc_t_1 + workers_t_1, data=data)
+
+pairs(data[4:7],)
+plot(data$avg_t ~ fitted(mod), main="Y vs Fitted Values", xlab="Fitted", ylab="Avg Annual Economic Growth")
+lines(lowess(data$avg_t ~ fitted(mod)), lty=2)
+abline(a = 0, b = 1)
+
+
+
+# make all residual plots
+par(mfrow=c(3,4))
+plot(rstandard(mod)~fitted(mod), xlab="fitted", ylab="Residuals")
+for(i in c(4:7)){
+  plot(rstandard(mod)~data[,i], xlab=names(data)[i], ylab="Residuals")
+}
+
+
+qqnorm(rstandard(mod))
+qqline(rstandard(mod))
+vif(mod)
+```
+
+Linearity holds, uncorrelated errors holds better than untransformed model, non-constant variance is satisfied, and normality holds better than previously. We don’t worry about multicollinearity as all our VIF are less than 5. As our dataset doesn’t has any more potential predictors after we cleaned it, we skip the step of using AIC-based stepwise selection and go directly into testing our model with the test-dataset.
+
+```{r, eval=F}
+test_data <- build_data_use[ c(0:5, 30:33, 59:62, 113:116, 142:145), ]
+mod3 <- lm(I((avg_t)^0.5) ~ I((GINI_T_1)) + I((income_t_1)) + I((hc_t_1)) + I((workers_t_1)^0.33), data=test_data)
+summary(mod2)
+summary(mod3)
+
+data1 <- test_data %>%
+  mutate(avg_t = (avg_t)^0.5, income_t_1 = (income_t_1), hc_t_1 = (hc_t_1), workers_t_1 = (workers_t_1)^0.33, GINI_T_1 = (GINI_T_1))
+
+mod3 <- lm(avg_t ~ GINI_T_1 +income_t_1 + hc_t_1 + workers_t_1, data=data1)
+
+pairs(data1[4:7],)
+plot(data1$avg_t ~ fitted(mod3), main="Y vs Fitted Values", xlab="Fitted", ylab="Avg Annual Economic Growth")
+lines(lowess(data1$avg_t ~ fitted(mod3)), lty=2)
+abline(a = 0, b = 1)
+
+
+
+# make all residual plots
+par(mfrow=c(3,4))
+plot(rstandard(mod3)~fitted(mod3), xlab="fitted", ylab="Residuals")
+for(i in c(4:7)){
+  plot(rstandard(mod3)~data1[,i], xlab=names(data1)[i], ylab="Residuals")
+}
+
+
+qqnorm(rstandard(mod3))
+qqline(rstandard(mod3))
+vif(mod3)
+
+```
+
+Our model fails its test. Coefficients are vastly different from that of the model built with model-data. However, the assumptions hold. This means we overfitted the model and the transformations we did to our model using model-data only worked for such data. This is mainly because the test-dataset been very different from our train- dataset (mainly because between the years 1990-1994 economic growth in Central America boomed and then slowed down significantly while the other variables increased at their normal rates, I found out about this after this project). However, not much can be done to solve this as economic figures prior to 1990 of Central America are extrapolated and scarce. 
+
+This means there are many influential points in our test-dataset, which also lead to that failure. Furthermore, the test-dataset is small in econometrics terms, but there isn’t much to do about this as there is limited information concerning economic variables of Central American countries prior to 1990. Another limitation is the multicollinearity present in the model. When creating a model that predicts economic growth, multicollinearity is somewhat expected as most economic variables are intercorrelated.  All of these limitations are not corrected as they are out of my control and changing the data-points to better fit my model would be unethical.
+
+However, it should be noted that in both models there is a positive relationship between income inequality and economic growth of Central America. Nevertheless, more research have to be done to arrive to a definitive answer on the matter. 
+
+
+
