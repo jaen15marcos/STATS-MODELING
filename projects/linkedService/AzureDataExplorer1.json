@@ -1,0 +1,11 @@
+{
+	"name": "AzureDataExplorer1",
+	"properties": {
+		"annotations": [],
+		"type": "AzureDataExplorer",
+		"typeProperties": {
+			"endpoint": "https://pwt100.eastus.kusto.windows.net",
+			"database": "pwt100"
+		}
+	}
+}
