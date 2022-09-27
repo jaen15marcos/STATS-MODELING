@@ -1,0 +1,216 @@
+{
+	"name": "AzureDataExplorerTable1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataExplorer1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureDataExplorerTable",
+		"schema": [
+			{
+				"name": "countrycode",
+				"type": "string"
+			},
+			{
+				"name": "country",
+				"type": "string"
+			},
+			{
+				"name": "currency_unit",
+				"type": "string"
+			},
+			{
+				"name": "year",
+				"type": "int"
+			},
+			{
+				"name": "rgdpe",
+				"type": "real"
+			},
+			{
+				"name": "rgdpo",
+				"type": "real"
+			},
+			{
+				"name": "pop",
+				"type": "real"
+			},
+			{
+				"name": "emp",
+				"type": "real"
+			},
+			{
+				"name": "avh",
+				"type": "real"
+			},
+			{
+				"name": "hc",
+				"type": "real"
+			},
+			{
+				"name": "ccon",
+				"type": "real"
+			},
+			{
+				"name": "cda",
+				"type": "real"
+			},
+			{
+				"name": "cgdpe",
+				"type": "real"
+			},
+			{
+				"name": "cn",
+				"type": "real"
+			},
+			{
+				"name": "ck",
+				"type": "real"
+			},
+			{
+				"name": "ctfp",
+				"type": "real"
+			},
+			{
+				"name": "cwtfp",
+				"type": "real"
+			},
+			{
+				"name": "rgdpna",
+				"type": "real"
+			},
+			{
+				"name": "rconna",
+				"type": "real"
+			},
+			{
+				"name": "rdana",
+				"type": "real"
+			},
+			{
+				"name": "rnna",
+				"type": "real"
+			},
+			{
+				"name": "rkna",
+				"type": "real"
+			},
+			{
+				"name": "rtfpna",
+				"type": "real"
+			},
+			{
+				"name": "rwtfpna",
+				"type": "real"
+			},
+			{
+				"name": "irr",
+				"type": "real"
+			},
+			{
+				"name": "delta",
+				"type": "real"
+			},
+			{
+				"name": "xr",
+				"type": "real"
+			},
+			{
+				"name": "pl_con",
+				"type": "real"
+			},
+			{
+				"name": "pl_da",
+				"type": "real"
+			},
+			{
+				"name": "pl_gdpo",
+				"type": "real"
+			},
+			{
+				"name": "i_cig",
+				"type": "string"
+			},
+			{
+				"name": "i_xm",
+				"type": "string"
+			},
+			{
+				"name": "i_xr",
+				"type": "string"
+			},
+			{
+				"name": "i_outlier",
+				"type": "string"
+			},
+			{
+				"name": "i_irr",
+				"type": "string"
+			},
+			{
+				"name": "cor_exp",
+				"type": "real"
+			},
+			{
+				"name": "statcap",
+				"type": "real"
+			},
+			{
+				"name": "csh_c",
+				"type": "real"
+			},
+			{
+				"name": "csh_i",
+				"type": "real"
+			},
+			{
+				"name": "csh_g",
+				"type": "real"
+			},
+			{
+				"name": "csh_x",
+				"type": "real"
+			},
+			{
+				"name": "csh_m",
+				"type": "real"
+			},
+			{
+				"name": "csh_r",
+				"type": "real"
+			},
+			{
+				"name": "pl_c",
+				"type": "real"
+			},
+			{
+				"name": "pl_i",
+				"type": "real"
+			},
+			{
+				"name": "pl_g",
+				"type": "real"
+			},
+			{
+				"name": "pl_x",
+				"type": "real"
+			},
+			{
+				"name": "pl_m",
+				"type": "real"
+			},
+			{
+				"name": "pl_n",
+				"type": "real"
+			},
+			{
+				"name": "pl_k",
+				"type": "real"
+			}
+		],
+		"typeProperties": {
+			"table": "data_economic"
+		}
+	}
+}

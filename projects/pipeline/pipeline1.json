@@ -1,0 +1,660 @@
+{
+	"name": "pipeline1",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureDataExplorerSink"
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 1
+								},
+								"sink": {
+									"name": "countrycode",
+									"type": "String",
+									"physicalType": "string"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 2
+								},
+								"sink": {
+									"name": "country",
+									"type": "String",
+									"physicalType": "string"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 3
+								},
+								"sink": {
+									"name": "currency_unit",
+									"type": "String",
+									"physicalType": "string"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 4
+								},
+								"sink": {
+									"name": "year",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 5
+								},
+								"sink": {
+									"name": "rgdpe",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 6
+								},
+								"sink": {
+									"name": "rgdpo",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 7
+								},
+								"sink": {
+									"name": "pop",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 8
+								},
+								"sink": {
+									"name": "emp",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 9
+								},
+								"sink": {
+									"name": "avh",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 10
+								},
+								"sink": {
+									"name": "hc",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 11
+								},
+								"sink": {
+									"name": "ccon",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 12
+								},
+								"sink": {
+									"name": "cda",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 13
+								},
+								"sink": {
+									"name": "cgdpe",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 14
+								},
+								"sink": {
+									"name": "cn",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 15
+								},
+								"sink": {
+									"name": "ck",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 16
+								},
+								"sink": {
+									"name": "ctfp",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 17
+								},
+								"sink": {
+									"name": "cwtfp",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 18
+								},
+								"sink": {
+									"name": "rgdpna",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 19
+								},
+								"sink": {
+									"name": "rconna",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 20
+								},
+								"sink": {
+									"name": "rdana",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 21
+								},
+								"sink": {
+									"name": "rnna",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 22
+								},
+								"sink": {
+									"name": "rkna",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 23
+								},
+								"sink": {
+									"name": "rtfpna",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 24
+								},
+								"sink": {
+									"name": "rwtfpna",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 25
+								},
+								"sink": {
+									"name": "irr",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 26
+								},
+								"sink": {
+									"name": "delta",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 27
+								},
+								"sink": {
+									"name": "xr",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 28
+								},
+								"sink": {
+									"name": "pl_con",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 29
+								},
+								"sink": {
+									"name": "pl_da",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 30
+								},
+								"sink": {
+									"name": "pl_gdpo",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 31
+								},
+								"sink": {
+									"name": "i_cig",
+									"type": "String",
+									"physicalType": "string"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 32
+								},
+								"sink": {
+									"name": "i_xm",
+									"type": "String",
+									"physicalType": "string"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 33
+								},
+								"sink": {
+									"name": "i_xr",
+									"type": "String",
+									"physicalType": "string"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 34
+								},
+								"sink": {
+									"name": "i_outlier",
+									"type": "String",
+									"physicalType": "string"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 35
+								},
+								"sink": {
+									"name": "i_irr",
+									"type": "String",
+									"physicalType": "string"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 36
+								},
+								"sink": {
+									"name": "cor_exp",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 37
+								},
+								"sink": {
+									"name": "statcap",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 38
+								},
+								"sink": {
+									"name": "csh_c",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 39
+								},
+								"sink": {
+									"name": "csh_i",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 40
+								},
+								"sink": {
+									"name": "csh_g",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 41
+								},
+								"sink": {
+									"name": "csh_x",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 42
+								},
+								"sink": {
+									"name": "csh_m",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 43
+								},
+								"sink": {
+									"name": "csh_r",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 44
+								},
+								"sink": {
+									"name": "pl_c",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 45
+								},
+								"sink": {
+									"name": "pl_i",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 46
+								},
+								"sink": {
+									"name": "pl_g",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 47
+								},
+								"sink": {
+									"name": "pl_x",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 48
+								},
+								"sink": {
+									"name": "pl_m",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 49
+								},
+								"sink": {
+									"name": "pl_n",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"type": "String",
+									"physicalType": "String",
+									"ordinal": 50
+								},
+								"sink": {
+									"name": "pl_k",
+									"type": "Double",
+									"physicalType": "real"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": true
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DelimitedText1",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AzureDataExplorerTable1",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"annotations": []
+	}
+}
