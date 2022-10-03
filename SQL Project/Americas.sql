@@ -1,3 +1,7 @@
+/*
+Americas Economic Metric Data Exploration
+Skills used: Joins, CTE's, Temp Tables, Windows Functions, Aggregate Functions, Creating Views, Converting Data Types
+*/
 -- Get info of our table
 Describe pwt100;
 
